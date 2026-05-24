@@ -144,10 +144,10 @@ function buildMapping(tally){
 
 export default function App(){
   const [step,setStep]=useState(0);
-  const [pd,setPd]=useState(DEFAULT_PD);
-  const [dk,setDk]=useState(DEFAULT_DK);
-  const [tally,setTally]=useState(DEFAULT_TALLY);
-  const [map,setMap]=useState(()=>buildMapping(DEFAULT_TALLY));
+  const [pd,setPd]=useState({});
+  const [dk,setDk]=useState({});
+  const [tally,setTally]=useState([]);
+  const [map,setMap]=useState([]);
   const [tallyMode,setTallyMode]=useState("weight");
   const [fillMissing,setFillMissing]=useState(true);
   const [busy,setBusy]=useState({pd:false,dk:false,boat:false});
@@ -339,11 +339,13 @@ function BoatStep({tally,setTally,mode,setMode,effW,onUpload,busy,msg,next}){
     {msg&&<div style={{fontSize:12.5,color:busy?C.warn:C.dim,marginTop:10}}>{msg}</div>}
     <div style={{fontSize:11.5,color:C.dim,marginTop:6}}>Accepts the boat <b>.xlsx</b> directly, or CSV/PDF. Skips “*” summary and Total rows automatically.</div>
     <div style={{marginTop:16,overflowX:"auto"}}>
-      <table><thead><tr><th>Species</th><th>Size</th>{mode==="boxes"?<><th className="r">Boxes</th><th className="r">Avg box</th><th className="r">Weight</th></>:<th className="r">Weight kg</th>}</tr></thead>
+      {tally.length===0
+        ? <div style={{padding:"28px 16px",textAlign:"center",color:C.dim,fontSize:13.5,border:`1px dashed ${C.line}`,borderRadius:10}}>No catch loaded yet. Upload the boat file above to begin.</div>
+        : <table><thead><tr><th>Species</th><th>Size</th>{mode==="boxes"?<><th className="r">Boxes</th><th className="r">Avg box</th><th className="r">Weight</th></>:<th className="r">Weight kg</th>}</tr></thead>
       <tbody>{tally.map((r)=>(<tr key={r.id}><td style={{fontWeight:600}}>{r.sp}</td><td style={{color:C.dim}}>{r.size}</td>
         {mode==="boxes"?<><td className="r"><input className="ci" style={{width:56}} type="number" value={r.boxes} onChange={(e)=>upd(r.id,"boxes",e.target.value)}/></td><td className="r"><input className="ci" style={{width:60}} type="number" step="0.1" value={r.avgBox} onChange={(e)=>upd(r.id,"avgBox",e.target.value)}/></td><td className="r" style={{color:C.dim,fontFamily:MONO}}>{(r.boxes*r.avgBox).toFixed(1)}</td></>
         :<td className="r"><input className="ci" style={{width:80}} type="number" step="0.01" value={r.wt} onChange={(e)=>upd(r.id,"wt",e.target.value)}/></td>}
-      </tr>))}</tbody></table>
+      </tr>))}</tbody></table>}
     </div>
     <NextBtn onClick={next}/>
   </Card>);
@@ -358,6 +360,7 @@ function PriceStep({which,title,accent,prices,setPrices,onUpload,busy,msg,next})
       {msg&&<div style={{fontSize:12.5,color:busy?C.warn:C.dim}}>{msg}</div>}
     </div>
     <div style={{marginTop:18,display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:14}}>
+      {Object.keys(prices).length===0&&<div style={{gridColumn:"1/-1",padding:"28px 16px",textAlign:"center",color:C.dim,fontSize:13.5,border:`1px dashed ${C.line}`,borderRadius:10}}>No prices loaded yet. Upload the sheet above — or skip, and prices from the other market will be used.</div>}
       {Object.keys(prices).map((sp)=>(<div key={sp} style={{background:C.panel2,border:`1px solid ${C.line}`,borderRadius:9,padding:"10px 12px"}}>
         <div style={{fontWeight:700,fontSize:13.5,marginBottom:7}}>{sp}</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:7}}>{Object.keys(prices[sp]).map((gr)=>(<div key={gr} style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:11,color:C.dim,fontFamily:MONO}}>{gr}</span><input className="ci" style={{width:56}} type="number" step="0.01" value={prices[sp][gr]??""} onChange={(e)=>setCell(sp,gr,e.target.value)}/></div>))}</div>
