@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  # Allow large base64 PDFs/images to be POSTed to the parse function
+  node_bundler = "esbuild"
+
+# SPA fallback: serve index.html for any non-file route
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

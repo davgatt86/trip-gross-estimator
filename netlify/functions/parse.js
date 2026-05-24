@@ -1,0 +1,61 @@
+// netlify/functions/parse.js
+// Proxies parse requests to the Anthropic API using a server-side key.
+// The browser never sees ANTHROPIC_API_KEY. Set it in Netlify:
+//   Site settings -> Environment variables -> ANTHROPIC_API_KEY
+
+export const handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
+  }
+
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) {
+    return { statusCode: 500, body: JSON.stringify({ error: "Server missing ANTHROPIC_API_KEY" }) };
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(event.body || "{}");
+  } catch {
+    return { statusCode: 400, body: JSON.stringify({ error: "Bad JSON body" }) };
+  }
+
+  const { media, mediaType, prompt } = payload;
+  if (!media || !prompt) {
+    return { statusCode: 400, body: JSON.stringify({ error: "Missing media or prompt" }) };
+  }
+
+  const isPdf = (mediaType || "").includes("pdf");
+  const doc = isPdf
+    ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: media } }
+    : { type: "image", source: { type: "base64", media_type: mediaType || "image/png", data: media } };
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4000,
+        messages: [{ role: "user", content: [doc, { type: "text", text: prompt }] }],
+      }),
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) {
+      return {
+        statusCode: resp.status,
+        body: JSON.stringify({ error: (data && data.error && data.error.message) || `Anthropic ${resp.status}` }),
+      };
+    }
+    // Return just the joined text so the client can extract JSON from it
+    const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+    return { statusCode: 200, body: JSON.stringify({ text }) };
+  } catch (e) {
+    return { statusCode: 502, body: JSON.stringify({ error: String(e.message || e) }) };
+  }
+};
