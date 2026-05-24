@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 /* ============================================================
    Trip Gross Estimator v2 — Peterhead vs Hanstholm
@@ -270,12 +272,69 @@ export default function App(){
     finally{setBusy((b)=>({...b,boat:false}));}
   }
 
-  function exportCSV(){
-    const head=["Species","Size","Weight kg","PD Sp","PD Gr","PD £/kg","PD Total","DK Sp","DK Sort","DK £/kg","DK Total","Diff","Note"];
-    const L=rows.map((r)=>[r.sp,r.size,r.w.toFixed(1),r.m.pdSp,r.m.pdGr,r.pdPrice.toFixed(2),r.pdTotal.toFixed(2),r.m.dkSp,r.m.dkSort,r.dkPrice.toFixed(2),r.dkTotal.toFixed(2),r.diff.toFixed(2),r.note]);
-    L.push([]);L.push(["TOTAL","",totals.w.toFixed(1),"","","",totals.pd.toFixed(2),"","","",totals.dk.toFixed(2),totals.diff.toFixed(2),""]);
-    const csv=[head,...L].map((r)=>r.map((c)=>`"${c??""}"`).join(",")).join("\n");
-    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="trip_gross_estimate.csv";a.click();
+  function exportPDF(){
+    const doc=new jsPDF({unit:"pt",format:"a4"});
+    const W=doc.internal.pageSize.getWidth();
+    const M=40; let y=46;
+    const PDc=[74,158,255], DKc=[255,122,69], ink=[20,28,36], dim=[120,130,140];
+    const money=(n)=>"£"+(n||0).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const dateStr=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+
+    // Header
+    doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(...ink);
+    doc.text("Trip Gross Estimate",M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(10.5);doc.setTextColor(...dim);
+    doc.text("AUDACIOUS BF83",M,y+16);
+    doc.text(`Generated ${dateStr}  ·  ${totals.w.toLocaleString("en-GB",{maximumFractionDigits:0})} kg landed`,M,y+30);
+    y+=52;
+
+    // Headline boxes
+    const winner=totals.diff>=0?"HANSTHOLM":"PETERHEAD";
+    const wc=totals.diff>=0?DKc:PDc;
+    const bw=(W-2*M-16)/3;
+    const box=(x,label,val,col)=>{
+      doc.setDrawColor(225);doc.setFillColor(248,249,250);doc.roundedRect(x,y,bw,56,5,5,"FD");
+      doc.setFontSize(8.5);doc.setTextColor(...dim);doc.setFont("helvetica","bold");
+      doc.text(label.toUpperCase(),x+12,y+18);
+      doc.setFontSize(15);doc.setTextColor(...col);doc.text(val,x+12,y+40);
+    };
+    box(M,"Peterhead",money(totals.pd),PDc);
+    box(M+bw+8,"Hanstholm",money(totals.dk),DKc);
+    box(M+2*bw+16,`${winner} better by`,(totals.diff>=0?"+":"")+money(Math.abs(totals.diff)),wc);
+    y+=72;
+
+    // By-species table
+    autoTable(doc,{
+      startY:y, margin:{left:M,right:M},
+      head:[["Species","kg","Peterhead","Hanstholm","Difference","Better"]],
+      body:summary.map((s)=>[s.sp,s.w.toFixed(0),money(s.pd),money(s.dk),(s.diff>=0?"+":"")+money(s.diff),Math.abs(s.diff)<0.01?"tie":s.diff>0?"Hanstholm":"Peterhead"]),
+      foot:[["TOTAL",totals.w.toFixed(0),money(totals.pd),money(totals.dk),(totals.diff>=0?"+":"")+money(totals.diff),winner.charAt(0)+winner.slice(1).toLowerCase()]],
+      styles:{font:"helvetica",fontSize:9,cellPadding:4},
+      headStyles:{fillColor:ink,textColor:255,fontSize:8.5},
+      footStyles:{fillColor:[240,242,245],textColor:ink,fontStyle:"bold"},
+      columnStyles:{1:{halign:"right"},2:{halign:"right"},3:{halign:"right"},4:{halign:"right"}},
+      didParseCell:(d)=>{ if(d.section==="body"&&(d.column.index===4||d.column.index===5)){const s=summary[d.row.index];if(s&&Math.abs(s.diff)>=0.01)d.cell.styles.textColor=s.diff>0?DKc:PDc;} },
+    });
+    y=doc.lastAutoTable.finalY+22;
+
+    // Per-line detail table
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(...ink);
+    doc.text("Detail — every line",M,y);y+=8;
+    autoTable(doc,{
+      startY:y, margin:{left:M,right:M},
+      head:[["Species","Size","kg","PD gr","PD £/kg","PD total","DK sort","DK £/kg","DK total","Note"]],
+      body:rows.map((r)=>[r.sp,r.size,r.w.toFixed(0),r.m.pdGr,(r.pdPrice||0).toFixed(2),money(r.pdTotal),r.m.dkSort,(r.dkPrice||0).toFixed(2),money(r.dkTotal),r.note||""]),
+      styles:{font:"helvetica",fontSize:7.5,cellPadding:2.5,overflow:"linebreak"},
+      headStyles:{fillColor:ink,textColor:255,fontSize:7.5},
+      columnStyles:{2:{halign:"right"},4:{halign:"right"},5:{halign:"right"},7:{halign:"right"},8:{halign:"right"},9:{textColor:dim,fontSize:6.8}},
+    });
+    y=doc.lastAutoTable.finalY+18;
+
+    if(y>770){doc.addPage();y=46;}
+    doc.setFont("helvetica","italic");doc.setFontSize(8);doc.setTextColor(...dim);
+    doc.text("Estimate only — based on the prices and mappings entered. Amber/substituted lines used the other market's price where one market had no price. Not a settlement.",M,y,{maxWidth:W-2*M});
+
+    doc.save(`trip_gross_${new Date().toISOString().slice(0,10)}.pdf`);
   }
 
   const STEPS=["Boat tally","Peterhead prices","Hanstholm prices","Check mapping","Estimated gross"];
@@ -313,7 +372,7 @@ export default function App(){
         {step===1&&<PriceStep which="pd" title="Peterhead price sheet" accent={C.pd} prices={pd} setPrices={setPd} onUpload={(f)=>parsePrice(f,"pd")} busy={busy.pd} msg={msg.pd} next={()=>setStep(2)}/>}
         {step===2&&<PriceStep which="dk" title="Hanstholm price sheet" accent={C.dk} prices={dk} setPrices={setDk} onUpload={(f)=>parsePrice(f,"dk")} busy={busy.dk} msg={msg.dk} next={()=>setStep(3)}/>}
         {step===3&&<MapStep tally={tally} map={map} setMap={setMap} pd={pd} dk={dk} next={()=>setStep(4)}/>}
-        {step===4&&<ResultStep rows={rows} totals={totals} summary={summary} fillMissing={fillMissing} setFillMissing={setFillMissing} tallyMode={tallyMode} exportCSV={exportCSV}/>}
+        {step===4&&<ResultStep rows={rows} totals={totals} summary={summary} fillMissing={fillMissing} setFillMissing={setFillMissing} tallyMode={tallyMode} exportPDF={exportPDF}/>}
       </div>
     </div>
   );
@@ -435,7 +494,7 @@ function MapStep({tally,map,setMap,pd,dk,next}){
 }
 function Dot({c}){return(<span style={{display:"inline-block",width:9,height:9,borderRadius:9,background:c,verticalAlign:"middle"}}/>);}
 
-function ResultStep({rows,totals,summary,fillMissing,setFillMissing,tallyMode,exportCSV}){
+function ResultStep({rows,totals,summary,fillMissing,setFillMissing,tallyMode,exportPDF}){
   const winner=totals.diff>=0?"Hanstholm":"Peterhead";const wc=totals.diff>=0?C.dk:C.pd;
   const pct=Math.min(totals.pd,totals.dk)>0?(Math.abs(totals.diff)/Math.min(totals.pd,totals.dk)*100).toFixed(1):"0";
   return(<div style={{display:"grid",gap:20}}>
@@ -447,7 +506,7 @@ function ResultStep({rows,totals,summary,fillMissing,setFillMissing,tallyMode,ex
     <Card>
       <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",marginBottom:10}}>
         <div style={{fontSize:16,fontWeight:700}}>By species</div>
-        <button onClick={exportCSV} style={{marginLeft:"auto",background:C.ink,color:C.bg,border:"none",padding:"8px 16px",borderRadius:7,fontWeight:700,cursor:"pointer",fontFamily:FONT,fontSize:13}}>⬇ Export CSV</button>
+        <button onClick={exportPDF} style={{marginLeft:"auto",background:C.ink,color:C.bg,border:"none",padding:"8px 16px",borderRadius:7,fontWeight:700,cursor:"pointer",fontFamily:FONT,fontSize:13}}>⬇ Download PDF</button>
       </div>
       <label style={{fontSize:12.5,color:C.dim,display:"flex",alignItems:"center",gap:7,cursor:"pointer",marginBottom:12}}><input type="checkbox" checked={fillMissing} onChange={(e)=>setFillMissing(e.target.checked)}/>Fill missing prices from other market</label>
 
