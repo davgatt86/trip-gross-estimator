@@ -189,6 +189,7 @@ export default function App(){
   const [map,setMap]=useState([]);
   const [tallyMode,setTallyMode]=useState("weight");
   const [fillMissing,setFillMissing]=useState(true);
+  const [pdHigh,setPdHigh]=useState(false); // false = AVE (default), true = all PD grades use HIGH column
   const [busy,setBusy]=useState({pd:false,dk:false,boat:false});
   const [msg,setMsg]=useState({pd:"",dk:"",boat:"Loaded Trip 54 (so far) — prices default to 22/05/26. Upload to replace either."});
 
@@ -219,9 +220,17 @@ export default function App(){
   // grade order helpers — A-grades A1(big)..A5(small); DK sorts 0(above)..9(ungraded)
   const pdLadder=["A1","A2","A3","A4","A5","U9"];
   const dkLadder=["0","1","2","3","4","5","9"];
-  const stepGrade=(spObj,grade,ladder)=>{
+  const stepGrade=(spObj,grade,ladder,prefHigh)=>{
+    // If "all high" is on and this is a plain grade (no explicit (low)/(high)),
+    // prefer the grade's HIGH price when the parser captured one.
+    if(prefHigh&&!/\((low|high)\)\s*$/.test(String(grade))){
+      const hk=grade+" (high)";
+      if(spObj[hk]!=null)return {price:spObj[hk],exact:true,via:grade};
+    }
     if(spObj[grade]!=null)return {price:spObj[grade],exact:true,via:grade};
     const base=String(grade).replace(/\s*\((low|high)\)\s*$/,"");
+    if(prefHigh&&spObj[base+" (high)"]!=null)return {price:spObj[base+" (high)"],exact:false,via:base};
+    if(spObj[base]!=null)return {price:spObj[base],exact:false,via:base};
     let idx=ladder.indexOf(base);
     if(idx>=0){
       for(let d=1;d<ladder.length;d++){
@@ -237,8 +246,8 @@ export default function App(){
     return null;
   };
   // Returns {price, exact, via} or null when species absent from this market.
-  const resolvePD=(sp,gr)=>{const o=findSpeciesObj(pd,sp);return o?stepGrade(o,gr,pdLadder):null;};
-  const resolveDK=(sp,so)=>{const o=findSpeciesObj(dk,sp);return o?stepGrade(o,so,dkLadder):null;};
+  const resolvePD=(sp,gr)=>{const o=findSpeciesObj(pd,sp);return o?stepGrade(o,gr,pdLadder,pdHigh):null;};
+  const resolveDK=(sp,so)=>{const o=findSpeciesObj(dk,sp);return o?stepGrade(o,so,dkLadder,false):null;};
 
   // Back-compat plain-number helpers (0 = not found on this market)
   const pdPrice=(sp,gr)=>{const r=resolvePD(sp,gr);return r?r.price:0;};
@@ -482,7 +491,7 @@ export default function App(){
         {step===0&&<BoatStep tally={tally} setTally={setTally} mode={tallyMode} setMode={setTallyMode} effW={effW} onUpload={parseBoat} busy={busy.boat} msg={msg.boat} next={()=>setStep(1)}/>}
         {step===1&&<PriceStep which="pd" title="Peterhead price sheet" accent={C.pd} prices={pd} setPrices={setPd} onUpload={(f)=>parsePrice(f,"pd")} busy={busy.pd} msg={msg.pd} next={()=>setStep(2)}/>}
         {step===2&&<PriceStep which="dk" title="Hanstholm price sheet" accent={C.dk} prices={dk} setPrices={setDk} onUpload={(f)=>parsePrice(f,"dk")} busy={busy.dk} msg={msg.dk} next={()=>setStep(3)}/>}
-        {step===3&&<MapStep tally={tally} map={map} setMap={setMap} pd={pd} dk={dk} next={()=>setStep(4)}/>}
+        {step===3&&<MapStep tally={tally} map={map} setMap={setMap} pd={pd} dk={dk} pdHigh={pdHigh} setPdHigh={setPdHigh} next={()=>setStep(4)}/>}
         {step===4&&<ResultStep rows={rows} totals={totals} summary={summary} fillMissing={fillMissing} setFillMissing={setFillMissing} tallyMode={tallyMode} exportPDF={exportPDF}/>}
       </div>
     </div>
@@ -540,7 +549,7 @@ function PriceStep({which,title,accent,prices,setPrices,onUpload,busy,msg,next})
   </Card>);
 }
 
-function MapStep({tally,map,setMap,pd,dk,next}){
+function MapStep({tally,map,setMap,pd,dk,pdHigh,setPdHigh,next}){
   const [editSp,setEditSp]=useState(false);
   function upd(i,f,v){setMap((p)=>p.map((m,idx)=>idx===i?{...m,[f]:v}:m));}
   const pdSp=Object.keys(pd).concat("—"),dkSp=Object.keys(dk).concat("—");
@@ -554,7 +563,24 @@ function MapStep({tally,map,setMap,pd,dk,next}){
     if(!k)k=keys.find((x)=>{const xn=x.toLowerCase().replace(/[^a-z]/g,"");return xn.startsWith(n)||n.startsWith(xn);});
     return k?obj[k]:null;
   };
-  const px=(obj,sp,k)=>{const o=findObj(obj,sp);return o&&o[k]!=null?o[k]:null;};
+  // px: look up a price, stepping to the nearest PRICED grade/sort in the SAME
+  // market when the exact one is blank — matching the gross calculation exactly.
+  // For PD, when "all high" is on and the key is a plain grade, prefer HIGH.
+  const PDL=["A1","A2","A3","A4","A5","U9"], DKL=["0","1","2","3","4","5","9"];
+  const px=(obj,sp,k,high,ladder)=>{
+    const o=findObj(obj,sp);if(!o)return null;
+    if(high&&!/\((low|high)\)\s*$/.test(String(k))&&o[k+" (high)"]!=null)return o[k+" (high)"];
+    if(o[k]!=null)return o[k];
+    const base=String(k).replace(/\s*\((low|high)\)\s*$/,"");
+    if(high&&o[base+" (high)"]!=null)return o[base+" (high)"];
+    if(o[base]!=null)return o[base];
+    const L=ladder||[]; const idx=L.indexOf(base);
+    if(idx>=0){for(let d=1;d<L.length;d++){
+      const lo=L[idx+d]; if(lo&&o[lo]!=null)return o[lo];
+      const hi=L[idx-d]; if(hi&&o[hi]!=null)return o[hi];
+    }}
+    return null;
+  };
   return(<Card>
     <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
       <div style={{fontSize:18,fontWeight:700}}>Check grade mapping</div>
@@ -562,7 +588,18 @@ function MapStep({tally,map,setMap,pd,dk,next}){
         <input type="checkbox" checked={editSp} onChange={(e)=>setEditSp(e.target.checked)}/>Edit species too
       </label>
     </div>
-    <div style={{color:C.dim,fontSize:12.5,marginTop:4,display:"flex",gap:14,flexWrap:"wrap"}}>
+    {/* Peterhead price-column toggle: AVG (default) <-> HIGH for all grades at once */}
+    <div style={{marginTop:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",background:C.panel2,border:`1px solid ${C.line}`,borderRadius:10,padding:"9px 11px"}}>
+      <span style={{fontSize:12.5,color:C.pd,fontWeight:700,letterSpacing:".03em"}}>PETERHEAD PRICES</span>
+      <div style={{marginLeft:"auto",display:"flex",borderRadius:8,overflow:"hidden",border:`1px solid ${C.line}`}}>
+        <button onClick={()=>setPdHigh(false)} style={{border:"none",cursor:"pointer",fontSize:13,fontWeight:700,padding:"7px 14px",background:!pdHigh?C.pd:"transparent",color:!pdHigh?"#04121f":C.dim}}>Average</button>
+        <button onClick={()=>setPdHigh(true)} style={{border:"none",cursor:"pointer",fontSize:13,fontWeight:700,padding:"7px 14px",background:pdHigh?C.pd:"transparent",color:pdHigh?"#04121f":C.dim}}>Top price</button>
+      </div>
+    </div>
+    <div style={{color:C.dim,fontSize:11.5,marginTop:6}}>
+      {pdHigh?"Using each grade’s HIGH (top) Peterhead price. You can still change any grade by hand below.":"Using each grade’s AVE (average) Peterhead price. Tap “Top price” to value the whole catch at the high column."}
+    </div>
+    <div style={{color:C.dim,fontSize:12.5,marginTop:8,display:"flex",gap:14,flexWrap:"wrap"}}>
       <span><Dot c={C.good}/> good</span><span><Dot c={C.warn}/> check</span><span><Dot c={C.bad}/> best-guess</span>
     </div>
 
@@ -572,7 +609,7 @@ function MapStep({tally,map,setMap,pd,dk,next}){
         const pdO=findObj(pd,m.pdSp), dkO=findObj(dk,m.dkSp);
         const pg=(pdO?Object.keys(pdO):[]).concat("ANY","—");
         const ds=(dkO?Object.keys(dkO):[]).concat("—");
-        const pdVal=px(pd,m.pdSp,m.pdGr), dkVal=px(dk,m.dkSp,m.dkSort);
+        const pdVal=px(pd,m.pdSp,m.pdGr,pdHigh,PDL), dkVal=px(dk,m.dkSp,m.dkSort,false,DKL);
         return(
           <div key={r.id} style={{background:C.panel2,border:`1px solid ${C.line}`,borderLeft:`4px solid ${cc[m.conf]}`,borderRadius:10,padding:"11px 13px"}}>
             {/* line header */}
