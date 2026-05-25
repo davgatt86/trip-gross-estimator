@@ -244,16 +244,28 @@ export default function App(){
   // grade order helpers — A-grades A1(big)..A5(small); DK sorts 0(above)..9(ungraded)
   const pdLadder=["A1","A2","A3","A4","A5","U9"];
   const dkLadder=["0","1","2","3","4","5","9"];
-  const stepGrade=(spObj,grade,ladder,prefHigh)=>{
-    // If "all high" is on and this is a plain grade (no explicit (low)/(high)),
-    // prefer the grade's HIGH price when the parser captured one.
-    if(prefHigh&&!/\((low|high)\)\s*$/.test(String(grade))){
-      const hk=grade+" (high)";
-      if(spObj[hk]!=null)return {price:spObj[hk],exact:true,via:grade};
+  const stepGrade=(spObj,grade,ladder,prefMid)=>{
+    // "Mid" mode: for a plain grade (no explicit (low)/(high)), value at the
+    // midpoint of AVE and HIGH — (avg+high)/2 — which is more realistic than
+    // assuming the top price across the whole catch. Falls back to AVE alone
+    // when no HIGH was captured (then avg+high/2 == avg anyway).
+    const midOf=(aveKey,hiKey)=>{
+      const a=spObj[aveKey], h=spObj[hiKey];
+      if(a!=null&&h!=null)return +((a+h)/2);
+      return a!=null?a:(h!=null?h:null);
+    };
+    if(prefMid&&!/\((low|high)\)\s*$/.test(String(grade))){
+      if(spObj[grade]!=null||spObj[grade+" (high)"]!=null){
+        const m=midOf(grade,grade+" (high)");
+        if(m!=null)return {price:m,exact:true,via:grade};
+      }
     }
     if(spObj[grade]!=null)return {price:spObj[grade],exact:true,via:grade};
     const base=String(grade).replace(/\s*\((low|high)\)\s*$/,"");
-    if(prefHigh&&spObj[base+" (high)"]!=null)return {price:spObj[base+" (high)"],exact:false,via:base};
+    if(prefMid&&(spObj[base]!=null||spObj[base+" (high)"]!=null)){
+      const m=midOf(base,base+" (high)");
+      if(m!=null)return {price:m,exact:false,via:base};
+    }
     if(spObj[base]!=null)return {price:spObj[base],exact:false,via:base};
     let idx=ladder.indexOf(base);
     if(idx>=0){
@@ -589,14 +601,16 @@ function MapStep({tally,map,setMap,pd,dk,pdHigh,setPdHigh,next}){
   };
   // px: look up a price, stepping to the nearest PRICED grade/sort in the SAME
   // market when the exact one is blank — matching the gross calculation exactly.
-  // For PD, when "all high" is on and the key is a plain grade, prefer HIGH.
+  // For PD, when "Mid" is on and the key is a plain grade, value at (avg+high)/2.
   const PDL=["A1","A2","A3","A4","A5","U9"], DKL=["0","1","2","3","4","5","9"];
-  const px=(obj,sp,k,high,ladder)=>{
+  const midPx=(o,base)=>{const a=o[base],h=o[base+" (high)"];if(a!=null&&h!=null)return +((a+h)/2);return a!=null?a:(h!=null?h:null);};
+  const px=(obj,sp,k,mid,ladder)=>{
     const o=findObj(obj,sp);if(!o)return null;
-    if(high&&!/\((low|high)\)\s*$/.test(String(k))&&o[k+" (high)"]!=null)return o[k+" (high)"];
+    const plain=!/\((low|high)\)\s*$/.test(String(k));
+    if(mid&&plain&&(o[k]!=null||o[k+" (high)"]!=null))return midPx(o,k);
     if(o[k]!=null)return o[k];
     const base=String(k).replace(/\s*\((low|high)\)\s*$/,"");
-    if(high&&o[base+" (high)"]!=null)return o[base+" (high)"];
+    if(mid&&(o[base]!=null||o[base+" (high)"]!=null))return midPx(o,base);
     if(o[base]!=null)return o[base];
     const L=ladder||[]; const idx=L.indexOf(base);
     if(idx>=0){for(let d=1;d<L.length;d++){
@@ -617,11 +631,11 @@ function MapStep({tally,map,setMap,pd,dk,pdHigh,setPdHigh,next}){
       <span style={{fontSize:12.5,color:C.pd,fontWeight:700,letterSpacing:".03em"}}>PETERHEAD PRICES</span>
       <div style={{marginLeft:"auto",display:"flex",borderRadius:8,overflow:"hidden",border:`1px solid ${C.line}`}}>
         <button onClick={()=>setPdHigh(false)} style={{border:"none",cursor:"pointer",fontSize:13,fontWeight:700,padding:"7px 14px",background:!pdHigh?C.pd:"transparent",color:!pdHigh?"#04121f":C.dim}}>Average</button>
-        <button onClick={()=>setPdHigh(true)} style={{border:"none",cursor:"pointer",fontSize:13,fontWeight:700,padding:"7px 14px",background:pdHigh?C.pd:"transparent",color:pdHigh?"#04121f":C.dim}}>Top price</button>
+        <button onClick={()=>setPdHigh(true)} style={{border:"none",cursor:"pointer",fontSize:13,fontWeight:700,padding:"7px 14px",background:pdHigh?C.pd:"transparent",color:pdHigh?"#04121f":C.dim}}>Mid (avg+high)</button>
       </div>
     </div>
     <div style={{color:C.dim,fontSize:11.5,marginTop:6}}>
-      {pdHigh?"Using each grade’s HIGH (top) Peterhead price. You can still change any grade by hand below.":"Using each grade’s AVE (average) Peterhead price. Tap “Top price” to value the whole catch at the high column."}
+      {pdHigh?"Using the midpoint of each grade’s AVE and HIGH Peterhead price — a realistic “better than average” estimate. You can still change any grade by hand below.":"Using each grade’s AVE (average) Peterhead price. Tap “Mid” to value at the midpoint of average and high."}
     </div>
     <div style={{color:C.dim,fontSize:12.5,marginTop:8,display:"flex",gap:14,flexWrap:"wrap"}}>
       <span><Dot c={C.good}/> good</span><span><Dot c={C.warn}/> check</span><span><Dot c={C.bad}/> best-guess</span>
