@@ -24,34 +24,36 @@ const C = {
    PD A1(big)..A5(small)/U9 ; DK sort 1(big), higher=smaller, 0=above 1. */
 const GRADE_DICT = {
   CAT:{ SMALL:{pd:"U9 (low)",dk:"2",c:"med"}, MEDIUM:{pd:"U9",dk:"1",c:"med"}, LARGE:{pd:"U9 (high)",dk:"1",c:"med"} },
-  COD:{ ROBBIE:{pd:"A5",dk:"5",c:"high"}, BABY:{pd:"A5",dk:"5",c:"high"}, "BIG BABY":{pd:"A4",dk:"4",c:"high"},
-        MEDIUM:{pd:"A3",dk:"3",c:"high"}, SPRAG:{pd:"A2",dk:"2",c:"high"}, COD:{pd:"A1",dk:"1",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"0",c:"med"}, "X LARGE":{pd:"A1",dk:"0",c:"med"} },
+  COD:{ ROBBIE:{pd:"A5",dk:"5",c:"high"}, BABY:{pd:"A5",dk:"5",c:"high"}, "BIG BABY":{pd:"A4",dk:"4",c:"high"}, "BIG SMALL":{pd:"A4",dk:"4",c:"high"}, SMALL:{pd:"A5",dk:"5",c:"high"},
+        MEDIUM:{pd:"A3",dk:"3",c:"high"}, SPRAG:{pd:"A2",dk:"2",c:"high"}, SELECTED:{pd:"A2",dk:"2",c:"high"}, COD:{pd:"A1",dk:"1",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, "BOBBY DAZLER":{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"0",c:"med"}, "X LARGE":{pd:"A1",dk:"0",c:"med"} },
   HADDOCK:{ "MINI METRO":{pd:"A4",dk:"3",c:"high"}, METRO:{pd:"A4",dk:"3",c:"med"}, CHIPPER:{pd:"A4",dk:"2",c:"med"},
-        SEED:{pd:"A3",dk:"2",c:"high"}, "GOOD SEED":{pd:"A2",dk:"1",c:"high"}, PINGER:{pd:"A2",dk:"1",c:"high"}, CHAT:{pd:"A1",dk:"1",c:"high"} },
-  HAKE:{ "X SMALL":{pd:"A4",dk:"4",c:"high"}, SMALL:{pd:"A3",dk:"3",c:"high"}, SEL:{pd:"A2",dk:"2",c:"high"},
+        SEED:{pd:"A3",dk:"2",c:"high"}, "GOOD SEED":{pd:"A2",dk:"1",c:"high"}, PINGER:{pd:"A2",dk:"1",c:"high"}, CHAT:{pd:"A1",dk:"1",c:"high"},
+        SELECTED:{pd:"A2",dk:"1",c:"high"}, MEDIUM:{pd:"A1",dk:"1",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"1",c:"med"} },
+  HAKE:{ "X SMALL":{pd:"A4",dk:"4",c:"high"}, PINS:{pd:"A5",dk:"4",c:"med"}, BYROS:{pd:"A5",dk:"4",c:"med"}, SMALL:{pd:"A3",dk:"3",c:"high"}, SEL:{pd:"A2",dk:"2",c:"high"},
         SELECTED:{pd:"A2",dk:"2",c:"high"}, MEDIUM:{pd:"A1",dk:"1",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"0",c:"med"}, "X LARGE":{pd:"A1",dk:"0",c:"med"} },
-  HALIBUT:{ "SIZE 1":{pd:"U9",dk:"1",c:"low"}, SMALL:{pd:"U9",dk:"2",c:"med"}, LARGE:{pd:"U9",dk:"1",c:"med"} },
+  HALIBUT:{ "SIZE 1":{pd:"U9",dk:"1",c:"low"}, SMALL:{pd:"U9",dk:"2",c:"med"}, SELECTED:{pd:"U9",dk:"1",c:"med"}, MEDIUM:{pd:"U9",dk:"1",c:"med"}, LARGE:{pd:"U9",dk:"1",c:"med"} },
   "LEMON SOLE":{ SMALL:{pd:"A3",dk:"3",c:"low"}, MEDIUM:{pd:"A2",dk:"2",c:"low"}, LARGE:{pd:"A1",dk:"2",c:"low"} },
-  LING:{ SMALL:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"} },
-  LYTHE:{ SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"}, SELECTED:{pd:"A3",dk:"3",c:"high"},
+  LING:{ SMALL:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, MIXED:{pd:"A2",dk:"2",c:"med"} },
+  LYTHE:{ "X SMALL":{pd:"A4",dk:"4",c:"med"}, SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"}, SELECTED:{pd:"A3",dk:"3",c:"high"},
         MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"2",c:"med"} },
-  MEGRIM:{ "X SMALL":{pd:"A3",dk:"3",c:"med"}, SMALL:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"med"}, LARGE:{pd:"A2",dk:"1",c:"med"} },
+  MEGRIM:{ "X SMALL":{pd:"A3",dk:"3",c:"med"}, SMALL:{pd:"A3",dk:"3",c:"high"}, SELECTED:{pd:"A2",dk:"2",c:"med"}, MEDIUM:{pd:"A2",dk:"2",c:"med"}, LARGE:{pd:"A2",dk:"1",c:"med"}, BRUISED:{pd:"A3",dk:"3",c:"low"} },
   MONKFISH:{ FROGS:{pd:"A5",dk:"5",c:"high"}, SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"},
         SELECTED:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"1",c:"med"} },
-  SAITHE:{ "X SMALL":{pd:"A4",dk:"4",c:"high"}, SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"},
+  SAITHE:{ "X SMALL":{pd:"A4",dk:"4",c:"high"}, COLAS:{pd:"A4",dk:"4",c:"med"}, PODS:{pd:"A4",dk:"4",c:"med"}, SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"},
         SELECTED:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"} },
-  SQUID:{ SEL:{pd:"U9",dk:"2",c:"low"}, SELECTED:{pd:"U9",dk:"2",c:"low"}, MEDIUM:{pd:"U9",dk:"2",c:"low"}, SMALL:{pd:"U9 (low)",dk:"2",c:"low"} },
-  TURBOT:{ "SIZE 1":{pd:"U9 (low)",dk:"3",c:"low"}, SMALL:{pd:"U9 (low)",dk:"3",c:"low"}, LARGE:{pd:"U9 (high)",dk:"1",c:"low"} },
+  SQUID:{ LARGE:{pd:"U9 (high)",dk:"2",c:"low"}, SEL:{pd:"U9",dk:"2",c:"low"}, SELECTED:{pd:"U9",dk:"2",c:"low"}, MEDIUM:{pd:"U9",dk:"2",c:"low"}, SMALL:{pd:"U9 (low)",dk:"2",c:"low"} },
+  TURBOT:{ "SIZE 1":{pd:"U9 (low)",dk:"3",c:"low"}, SMALL:{pd:"U9 (low)",dk:"3",c:"low"}, MEDIUM:{pd:"U9",dk:"2",c:"low"}, LARGE:{pd:"U9 (high)",dk:"1",c:"low"} },
   TUSK:{ "SIZE 1":{pd:"U9",dk:"1",c:"low"}, MIX:{pd:"U9",dk:"1",c:"med"} },
-  WHITING:{ "SMALL ROUND":{pd:"A4r (low)",dk:"2",c:"med"}, ROUND:{pd:"A4r",dk:"2",c:"med"}, SMALL:{pd:"A2",dk:"1",c:"med"}, MEDIUM:{pd:"A2",dk:"1",c:"high"} },
+  PLAICE:{ SMALL:{pd:"A4",dk:"4",c:"high"}, SELECTED:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"} },
+  WHITING:{ "SMALL ROUND":{pd:"A4r (low)",dk:"2",c:"med"}, ROUND:{pd:"A4r",dk:"2",c:"med"}, SMALL:{pd:"A2",dk:"1",c:"med"}, SELECTED:{pd:"A2",dk:"1",c:"med"}, MEDIUM:{pd:"A2",dk:"1",c:"high"} },
   WITCH:{ "SIZE 3":{pd:"U9",dk:"3",c:"low"}, ROUND:{pd:"U9",dk:"2",c:"low"} },
 };
 
 const SP_TO_PD = { CAT:"Catfish", COD:"Cod", HADDOCK:"Haddock", HAKE:"Hake", HALIBUT:"Halibut",
-  "LEMON SOLE":"Lemons", LING:"Ling", LYTHE:"Lythe", MEGRIM:"Megrim", MONKFISH:"Monks",
+  "LEMON SOLE":"Lemons", LING:"Ling", LYTHE:"Lythe", MEGRIM:"Megrim", MONKFISH:"Monks", PLAICE:"Plaice",
   SAITHE:"Coley", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch" };
 const SP_TO_DK = { CAT:"Catfishes", COD:"Atlantic Cod", HADDOCK:"Haddock", HAKE:"European Hake",
-  HALIBUT:"Atlantic Halibut", "LEMON SOLE":"Lemon Sole", LING:"Ling", LYTHE:"Pollack", MEGRIM:"Megrim",
+  HALIBUT:"Atlantic Halibut", "LEMON SOLE":"Lemon Sole", LING:"Ling", LYTHE:"Pollack", MEGRIM:"Megrim", PLAICE:"European Plaice",
   MONKFISH:"Monkfish", SAITHE:"Saithe", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch Flounder" };
 
 const DEFAULT_PD = {
@@ -103,6 +105,33 @@ const GRADE_LABEL = { A4c:"A4 Chipper", A4m:"A4 Metro (high)", A4ma:"A4 Metro (a
 
 const norm=(s)=>String(s||"").toUpperCase().replace(/^\d+\.?\s*/,"").replace(/\s*\([^)]*\)\s*$/,"").trim();
 
+// Different boats label the same grade differently and often bake the species
+// name into the label (e.g. "SML SAITHE", "LRG HADD", "SEL WHIT"). canonSize
+// strips the species word and expands abbreviations to the canonical size
+// tokens used in GRADE_DICT (SMALL, MEDIUM, LARGE, SELECTED, X SMALL, ...).
+const canonSize=(rawSize,sp)=>{
+  let t=norm(rawSize);
+  // explicit multi-word forms first (before species-word stripping)
+  const pre={"ROUND WH":"ROUND","SEL ROUND":"SMALL ROUND","SML ROUND":"SMALL ROUND","EXTRA SMALL":"X SMALL","XL LRG":"XL","BIG SMALL":"BIG BABY","MINI METRO":"MINI METRO","BOBBY DAZLER":"COD","BOBBY DAZZLER":"COD","GOOD SEED":"GOOD SEED"};
+  if(pre[t])return pre[t];
+  // drop a trailing species word so "SML SAITHE" -> "SML", "LRG HADD" -> "LRG"
+  const spWords=["SAITHE","HADDOCK","HADD","WHITING","WHIT","MONKFISH","MONK","HAKE","SQUID","PLAICE","LEMON","MEGS","MEGRIM","LING","LYTHE","POLLACK","COD"];
+  for(const w of spWords){const re=new RegExp("\\s*"+w+"\\s*$");if(re.test(t)){t=t.replace(re,"").trim();break;}}
+  // expand common abbreviations
+  const map={
+    "LRG":"LARGE","LGE":"LARGE","LG":"LARGE",
+    "SML":"SMALL","SM":"SMALL",
+    "MED":"MEDIUM","MD":"MEDIUM",
+    "SEL":"SELECTED","SELECT":"SELECTED",
+    "XS":"X SMALL","X S":"X SMALL","XSML":"X SMALL",
+    "X LARGE":"XL","XLRG":"XL",
+    "RND":"ROUND","ROBBY":"ROBBIE",
+  };
+  if(map[t])t=map[t];
+  return t;
+};
+
+
 // Extract the bracket code, e.g. "1. Robbie (5b)" -> "5B". This is the TRUE grade;
 // the leading number before the name is just the scales touchscreen button position.
 const bracket=(s)=>{const m=String(s||"").match(/\(([^)]*)\)\s*$/);return m?m[1].toUpperCase().trim():"";};
@@ -132,14 +161,22 @@ const BRACKET_DICT = {
 };
 
 function buildMapping(tally){
+  // For species landed as one undifferentiated line (size label == species name,
+  // e.g. pair sheet "CATS","HALIBUT","TUSK"), fall back to a sensible single grade.
+  const SINGLE={ CAT:{pd:"U9",dk:"2",c:"low"}, HALIBUT:{pd:"U9",dk:"1",c:"low"}, TURBOT:{pd:"U9",dk:"2",c:"low"},
+    WITCH:{pd:"U9",dk:"2",c:"low"}, TUSK:{pd:"U9",dk:"1",c:"low"}, LING:{pd:"A2",dk:"2",c:"low"},
+    SQUID:{pd:"U9",dk:"2",c:"low"}, BRILL:{pd:"U9",dk:"—",c:"low"} };
   return tally.map((r)=>{
     const code=bracket(r.size);
     // Prefer per-species bracket-code mapping when available
     const bd=BRACKET_DICT[r.sp]&&code&&BRACKET_DICT[r.sp][code];
     if(bd) return { pdSp:SP_TO_PD[r.sp]||"—", pdGr:bd.pd, dkSp:SP_TO_DK[r.sp]||"—", dkSort:bd.dk, conf:bd.c };
-    // Fallback: existing name-based mapping
-    const tok=norm(r.size);
-    const d=(GRADE_DICT[r.sp]&&GRADE_DICT[r.sp][tok])||{pd:"—",dk:"—",c:"low"};
+    // Fallback: name-based mapping, with boat-synonym normalisation
+    const tok=GRADE_DICT[r.sp]&&GRADE_DICT[r.sp][norm(r.size)]?norm(r.size):canonSize(r.size,r.sp);
+    let d=GRADE_DICT[r.sp]&&GRADE_DICT[r.sp][tok];
+    // Single-line species (size label is basically the species itself)
+    if(!d&&SINGLE[r.sp]&&(norm(r.size)===r.sp||norm(r.size)===norm(SP_TO_PD[r.sp]||"")||/^(MIX|MIXED|UNSORTED|U\/R)$/.test(tok)||norm(r.size).includes(r.sp))) d=SINGLE[r.sp];
+    if(!d) d={pd:"—",dk:"—",c:"low"};
     return { pdSp:SP_TO_PD[r.sp]||"—", pdGr:d.pd, dkSp:SP_TO_DK[r.sp]||"—", dkSort:d.dk, conf:d.c };
   });
 }
@@ -156,19 +193,74 @@ export default function App(){
   const [msg,setMsg]=useState({pd:"",dk:"",boat:"Loaded Trip 54 (so far) — prices default to 22/05/26. Upload to replace either."});
 
   const effW=(r)=>tallyMode==="boxes"?r.boxes*r.avgBox:r.wt;
-  const pdPrice=(sp,gr)=>(pd[sp]&&pd[sp][gr]!=null?pd[sp][gr]:0);
-  const dkPrice=(sp,so)=>(dk[sp]&&dk[sp][so]!=null?dk[sp][so]:0);
+
+  // --- Robust price resolution -------------------------------------------
+  // 1) Find the species object even if the parser named it slightly
+  //    differently (e.g. "Monk"/"Monkfish" vs "Monks", "Lemon" vs "Lemons").
+  // 2) If the exact grade has no price, step to the NEAREST grade on the SAME
+  //    market (lower grade first, then higher).
+  // 3) Returning 0 means "this species isn't on this market at all" — the
+  //    caller then borrows the other market's price.
+  const findSpeciesObj=(obj,name)=>{
+    if(!name||name==="—")return null;
+    if(obj[name])return obj[name];
+    const keys=Object.keys(obj);
+    const n=String(name).toLowerCase().replace(/[^a-z]/g,"");
+    // exact normalised
+    let k=keys.find((x)=>x.toLowerCase().replace(/[^a-z]/g,"")===n);
+    // shared stem: longest common prefix is a big chunk of the shorter word
+    if(!k)k=keys.find((x)=>{
+      const xn=x.toLowerCase().replace(/[^a-z]/g,"");
+      let i=0;while(i<n.length&&i<xn.length&&n[i]===xn[i])i++;
+      return i>=4&&i>=Math.min(n.length,xn.length)-2; // e.g. monk|s vs monk|fish, lemon vs lemon|s
+    });
+    return k?obj[k]:null;
+  };
+  // grade order helpers — A-grades A1(big)..A5(small); DK sorts 0(above)..9(ungraded)
+  const pdLadder=["A1","A2","A3","A4","A5","U9"];
+  const dkLadder=["0","1","2","3","4","5","9"];
+  const stepGrade=(spObj,grade,ladder)=>{
+    if(spObj[grade]!=null)return {price:spObj[grade],exact:true,via:grade};
+    const base=String(grade).replace(/\s*\((low|high)\)\s*$/,"");
+    let idx=ladder.indexOf(base);
+    if(idx>=0){
+      for(let d=1;d<ladder.length;d++){
+        const lo=ladder[idx+d];        // lower grade (cheaper) first
+        if(lo&&spObj[lo]!=null)return {price:spObj[lo],exact:false,via:lo};
+        const hi=ladder[idx-d];        // then higher grade
+        if(hi&&spObj[hi]!=null)return {price:spObj[hi],exact:false,via:hi};
+      }
+    }
+    // last resort: any priced grade in this species
+    const ek=Object.keys(spObj).find((k)=>spObj[k]!=null);
+    if(ek)return {price:spObj[ek],exact:false,via:ek};
+    return null;
+  };
+  // Returns {price, exact, via} or null when species absent from this market.
+  const resolvePD=(sp,gr)=>{const o=findSpeciesObj(pd,sp);return o?stepGrade(o,gr,pdLadder):null;};
+  const resolveDK=(sp,so)=>{const o=findSpeciesObj(dk,sp);return o?stepGrade(o,so,dkLadder):null;};
+
+  // Back-compat plain-number helpers (0 = not found on this market)
+  const pdPrice=(sp,gr)=>{const r=resolvePD(sp,gr);return r?r.price:0;};
+  const dkPrice=(sp,so)=>{const r=resolveDK(sp,so);return r?r.price:0;};
 
   const rows=useMemo(()=>tally.map((r,i)=>{
     const m=map[i]||{}; const w=effW(r);
-    let pdN=pdPrice(m.pdSp,m.pdGr), dkN=dkPrice(m.dkSp,m.dkSort);
-    let pu=pdN,du=dkN,note="";
+    const pr=resolvePD(m.pdSp,m.pdGr), dr=resolveDK(m.dkSp,m.dkSort);
+    // base prices: same-market value (exact or nearest grade), else 0
+    let pu=pr?pr.price:0, du=dr?dr.price:0;
+    let note="";const notes=[];
+    if(pr&&!pr.exact)notes.push(`PD grade ${pr.via}`);   // same-market step
+    if(dr&&!dr.exact)notes.push(`DK sort ${dr.via}`);
     if(fillMissing){
-      if(pdN===0&&dkN===0)note="No price either market";
-      else if(pdN===0){pu=dkN;note="PD ← Hanstholm";}
-      else if(dkN===0){du=pdN;note="DK ← Peterhead";}
+      // Only borrow the OTHER market when this species is absent here (pr/dr null)
+      if(!pr&&!dr){note="No price either market";}
+      else if(!pr){pu=du;notes.push("PD ← Hanstholm");}
+      else if(!dr){du=pu;notes.push("DK ← Peterhead");}
     }
-    return {...r,m,w,pdPrice:pu,dkPrice:du,pdTotal:w*pu,dkTotal:w*du,diff:w*du-w*pu,note};
+    if(!note)note=notes.join(" · ");
+    return {...r,m,w,pdPrice:pu,dkPrice:du,pdTotal:w*pu,dkTotal:w*du,diff:w*du-w*pu,note,
+            pdExact:pr?pr.exact:false,dkExact:dr?dr.exact:false,pdHas:!!pr,dkHas:!!dr};
   }),[tally,map,pd,dk,tallyMode,fillMissing]);
 
   const totals=useMemo(()=>{const t=rows.reduce((a,r)=>({w:a.w+r.w,pd:a.pd+r.pdTotal,dk:a.dk+r.dkTotal}),{w:0,pd:0,dk:0});return{...t,diff:t.dk-t.pd};},[rows]);
@@ -238,36 +330,55 @@ export default function App(){
     return out;
   }
 
+  // Ask the AI parser for a clean tally array. Either pass {b64,mediaType} for a
+  // PDF/image, or {text} for spreadsheet rows the browser already read.
+  async function aiBoatRows({b64,mediaType,text}){
+    const prompt=`This is a fishing boat catch tally / landings report. It may be laid out in any style (one boat, or several boats side by side). Extract ONE row per individual size/grade line. For each, give: species (CAPS), the size/grade label exactly as printed, number of boxes, and weight in kg. RULES: Skip species sub-total rows (e.g. "TOTAL", "GH TOTAL", "TOTAL HAD"), the grand total, blank rows, discards/bait/mix rows, and any "haul/discards" section. If the sheet shows several boats with a combined column, use the COMBINED total boxes & kg (not one single boat). If a line has weight but no box count, set boxes to 0. Numbers may use a comma as the decimal separator (e.g. "687,85" means 687.85) and a dot or space as a thousands separator (e.g. "2.534,83" or "2 534,83" means 2534.83) — convert to a plain number. Respond with ONLY a JSON array, no explanation, no markdown: [{"sp":"COD","size":"Sprag","boxes":19,"wt":687.85}].`;
+    const body=b64?{media:b64,mediaType,prompt}:{text,prompt};
+    const resp=await fetch("/.netlify/functions/parse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const data=await resp.json();
+    if(!resp.ok){throw new Error((data&&data.error)||`server ${resp.status}`);}
+    let t=data.text||"";
+    const a=t.indexOf("["),z=t.lastIndexOf("]");
+    if(a<0||z<0||z<=a){throw new Error("no JSON array found");}
+    return JSON.parse(t.slice(a,z+1)).map((r)=>({sp:String(r.sp||"").toUpperCase(),size:String(r.size||""),boxes:+r.boxes||0,wt:+r.wt||0})).filter((r)=>r.sp&&r.wt);
+  }
+
   async function parseBoat(file){
     setBusy((b)=>({...b,boat:true}));setMsg((m)=>({...m,boat:"Reading boat file…"}));
     try{
-      const name=(file.name||"").toLowerCase();let parsed=[];
+      const name=(file.name||"").toLowerCase();let parsed=[];let usedAI=false;
       if(name.endsWith(".csv")||name.endsWith(".tsv")||name.endsWith(".txt")){
         parsed=parseBoatText(await fileToText(file));
+        if(!parsed.length){usedAI=true;parsed=await aiBoatRows({text:await fileToText(file)});}
       }else if(name.endsWith(".pdf")){
-        const b64=await fileToB64(file);
-        const prompt=`Boat landings/totals report. For every SIZE sub-row (NOT species summary '*' rows, NOT the grand Total), extract species, size label, boxes, weight kg. Respond with ONLY a JSON array, no explanation: [{"sp":"COD","size":"5. Sprag (2)","boxes":8,"wt":265.89}]. Species in CAPS, keep the size label exactly as printed including the bracket code.`;
-        const resp=await fetch("/.netlify/functions/parse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({media:b64,mediaType:"application/pdf",prompt})});
-        const data=await resp.json();
-        if(!resp.ok){throw new Error((data&&data.error)||`server ${resp.status}`);}
-        let t=data.text||"";
-        const a=t.indexOf("["),z=t.lastIndexOf("]");
-        if(a<0||z<0||z<=a){throw new Error("no JSON array found");}
-        parsed=JSON.parse(t.slice(a,z+1)).map((r)=>({sp:String(r.sp).toUpperCase(),size:r.size,boxes:+r.boxes||0,wt:+r.wt||0}));
+        usedAI=true;
+        parsed=await aiBoatRows({b64:await fileToB64(file),mediaType:"application/pdf"});
       }else if(name.endsWith(".xlsx")||name.endsWith(".xls")||name.endsWith(".xlsm")){
         const buf=await fileToBuf(file);
         const wb=XLSX.read(buf,{type:"array"});
-        const ws=wb.Sheets[wb.SheetNames[0]];
-        const rows=XLSX.utils.sheet_to_json(ws,{header:1,blankrows:false,defval:""});
-        parsed=parseBoatRows(rows);
+        // Fast-path: try MY format on every sheet (prefer one named TOTALS).
+        const order=[...wb.SheetNames].sort((a,b)=>(/total/i.test(b)?1:0)-(/total/i.test(a)?1:0));
+        for(const sn of order){
+          const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,blankrows:false,defval:""});
+          const got=parseBoatRows(rows);
+          if(got.length){parsed=got;break;}
+        }
+        // Fallback: hand the most likely sheet to the AI as text.
+        if(!parsed.length){
+          usedAI=true;
+          const sn=order[0];
+          const csv=XLSX.utils.sheet_to_csv(wb.Sheets[sn]);
+          parsed=await aiBoatRows({text:`Sheet "${sn}":\n`+csv});
+        }
       }else{
-        setMsg((m)=>({...m,boat:"Unsupported file. Upload the boat .xlsx, a CSV, or the boat PDF."}));
+        setMsg((m)=>({...m,boat:"Unsupported file. Upload a boat .xlsx/.xls, a CSV, or the boat PDF."}));
         setBusy((b)=>({...b,boat:false}));return;
       }
       if(!parsed.length)throw new Error("no rows found");
       const t=parsed.map((r,i)=>({id:i,sp:r.sp,size:r.size,boxes:r.boxes,wt:r.wt,avgBox:r.boxes?+(r.wt/r.boxes).toFixed(1):0}));
       setTally(t);setMap(buildMapping(t));
-      setMsg((m)=>({...m,boat:`Loaded ${t.length} size lines across ${new Set(t.map((x)=>x.sp)).size} species. Mapping auto-built — check step 4.`}));
+      setMsg((m)=>({...m,boat:`Loaded ${t.length} size lines across ${new Set(t.map((x)=>x.sp)).size} species${usedAI?" (read by AI — check step 4 carefully)":""}. Mapping auto-built — check step 4.`}));
     }catch(e){setMsg((m)=>({...m,boat:`Couldn't read boat file (${e.message}). Sample tally still loaded.`}));}
     finally{setBusy((b)=>({...b,boat:false}));}
   }
@@ -434,7 +545,16 @@ function MapStep({tally,map,setMap,pd,dk,next}){
   function upd(i,f,v){setMap((p)=>p.map((m,idx)=>idx===i?{...m,[f]:v}:m));}
   const pdSp=Object.keys(pd).concat("—"),dkSp=Object.keys(dk).concat("—");
   const cc={high:C.good,med:C.warn,low:C.bad};
-  const px=(obj,sp,k)=>(obj[sp]&&obj[sp][k]!=null?obj[sp][k]:null);
+  // alias-tolerant species finder (Monks~Monk~Monkfish, Lemons~Lemon, etc.)
+  const findObj=(obj,name)=>{
+    if(!name||name==="—")return null;
+    if(obj[name])return obj[name];
+    const keys=Object.keys(obj),n=String(name).toLowerCase().replace(/[^a-z]/g,"");
+    let k=keys.find((x)=>x.toLowerCase().replace(/[^a-z]/g,"")===n);
+    if(!k)k=keys.find((x)=>{const xn=x.toLowerCase().replace(/[^a-z]/g,"");return xn.startsWith(n)||n.startsWith(xn);});
+    return k?obj[k]:null;
+  };
+  const px=(obj,sp,k)=>{const o=findObj(obj,sp);return o&&o[k]!=null?o[k]:null;};
   return(<Card>
     <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
       <div style={{fontSize:18,fontWeight:700}}>Check grade mapping</div>
@@ -449,8 +569,9 @@ function MapStep({tally,map,setMap,pd,dk,next}){
     <div style={{marginTop:14,display:"grid",gap:10}}>
       {tally.map((r,i)=>{
         const m=map[i];
-        const pg=(pd[m.pdSp]?Object.keys(pd[m.pdSp]):[]).concat("ANY","—");
-        const ds=(dk[m.dkSp]?Object.keys(dk[m.dkSp]):[]).concat("—");
+        const pdO=findObj(pd,m.pdSp), dkO=findObj(dk,m.dkSp);
+        const pg=(pdO?Object.keys(pdO):[]).concat("ANY","—");
+        const ds=(dkO?Object.keys(dkO):[]).concat("—");
         const pdVal=px(pd,m.pdSp,m.pdGr), dkVal=px(dk,m.dkSp,m.dkSort);
         return(
           <div key={r.id} style={{background:C.panel2,border:`1px solid ${C.line}`,borderLeft:`4px solid ${cc[m.conf]}`,borderRadius:10,padding:"11px 13px"}}>
