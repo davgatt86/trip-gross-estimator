@@ -51,10 +51,10 @@ const GRADE_DICT = {
 
 const SP_TO_PD = { CAT:"Catfish", COD:"Cod", HADDOCK:"Haddock", HAKE:"Hake", HALIBUT:"Halibut",
   "LEMON SOLE":"Lemons", LING:"Ling", LYTHE:"Lythe", MEGRIM:"Megrim", MONKFISH:"Monks", PLAICE:"Plaice",
-  SAITHE:"Coley", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch" };
+  SAITHE:"Coley", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch", BRILL:"Brill", ROE:"—" };
 const SP_TO_DK = { CAT:"Catfishes", COD:"Atlantic Cod", HADDOCK:"Haddock", HAKE:"European Hake",
   HALIBUT:"Atlantic Halibut", "LEMON SOLE":"Lemon Sole", LING:"Ling", LYTHE:"Pollack", MEGRIM:"Megrim", PLAICE:"European Plaice",
-  MONKFISH:"Monkfish", SAITHE:"Saithe", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch Flounder" };
+  MONKFISH:"Monkfish", SAITHE:"Saithe", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch Flounder", BRILL:"Brill", ROE:"—" };
 
 const DEFAULT_PD = {
   Cod:{A1:7.08,A2:7.26,A3:7.41}, Haddock:{A1:6.75,A2:6.98,A3:4.77,A4:2.42,A4c:2.50,A4m:2.50,A4ma:2.20},
@@ -124,11 +124,35 @@ const canonSize=(rawSize,sp)=>{
     "MED":"MEDIUM","MD":"MEDIUM",
     "SEL":"SELECTED","SELECT":"SELECTED",
     "XS":"X SMALL","X S":"X SMALL","XSML":"X SMALL",
-    "X LARGE":"XL","XLRG":"XL",
+    "X LARGE":"XL","XLRG":"XL","XL LRG":"XL",
     "RND":"ROUND","ROBBY":"ROBBIE",
   };
   if(map[t])t=map[t];
   return t;
+};
+
+// Species-name normaliser: different boats name the same species differently
+// (CATFISH/CATFISHES -> CAT, POLLACK -> LYTHE, COLEY -> SAITHE, etc.). Maps an
+// incoming boat species name to the app's canonical species key.
+const canonSp=(raw)=>{
+  let s=String(raw||"").toUpperCase().replace(/\([^)]*\)/g,"").trim();
+  const A={
+    "CATFISH":"CAT","CATFISHES":"CAT","CATS":"CAT","CAT":"CAT","WOLF FISH":"CAT","WOLFFISH":"CAT",
+    "POLLACK":"LYTHE","POLLOCK":"LYTHE","LYTHE":"LYTHE","LYTHE/POLLACK":"LYTHE",
+    "COLEY":"SAITHE","SAITHE":"SAITHE","COLES":"SAITHE",
+    "MONKFISH":"MONKFISH","MONKS":"MONKFISH","MONK":"MONKFISH","ANGLER":"MONKFISH",
+    "MEGRIM":"MEGRIM","MEGRIMS":"MEGRIM","MEGS":"MEGRIM","MEG":"MEGRIM",
+    "LEMON SOLE":"LEMON SOLE","LEMONS":"LEMON SOLE","LEMON":"LEMON SOLE","LEMON SOLES":"LEMON SOLE",
+    "WHITING":"WHITING","WHIT":"WHITING",
+    "HADDOCK":"HADDOCK","HADD":"HADDOCK","HAD":"HADDOCK",
+    "HAKE":"HAKE","COD":"COD","LING":"LING","PLAICE":"PLAICE","HALIBUT":"HALIBUT",
+    "TURBOT":"TURBOT","BRILL":"BRILL","WITCH":"WITCH","WITCHES":"WITCH","WITCH FLOUNDER":"WITCH",
+    "TUSK":"TUSK","SQUID":"SQUID","ROE":"ROE","RANS":"ROE","ROES":"ROE","FISH ROE":"ROE",
+  };
+  if(A[s])return A[s];
+  // try stripping a trailing plural 'S' (e.g. "MONKS" handled above; generic safety)
+  if(A[s.replace(/S$/,"")])return A[s.replace(/S$/,"")];
+  return s; // unknown -> leave as-is (will show "no price" rather than mis-price)
 };
 
 
@@ -270,7 +294,7 @@ export default function App(){
     if(!note)note=notes.join(" · ");
     return {...r,m,w,pdPrice:pu,dkPrice:du,pdTotal:w*pu,dkTotal:w*du,diff:w*du-w*pu,note,
             pdExact:pr?pr.exact:false,dkExact:dr?dr.exact:false,pdHas:!!pr,dkHas:!!dr};
-  }),[tally,map,pd,dk,tallyMode,fillMissing]);
+  }),[tally,map,pd,dk,tallyMode,fillMissing,pdHigh]);
 
   const totals=useMemo(()=>{const t=rows.reduce((a,r)=>({w:a.w+r.w,pd:a.pd+r.pdTotal,dk:a.dk+r.dkTotal}),{w:0,pd:0,dk:0});return{...t,diff:t.dk-t.pd};},[rows]);
   const summary=useMemo(()=>{const m={};rows.forEach((r)=>{if(!m[r.sp])m[r.sp]={sp:r.sp,w:0,pd:0,dk:0};m[r.sp].w+=r.w;m[r.sp].pd+=r.pdTotal;m[r.sp].dk+=r.dkTotal;});return Object.values(m).map((s)=>({...s,diff:s.dk-s.pd}));},[rows]);
@@ -385,7 +409,7 @@ export default function App(){
         setBusy((b)=>({...b,boat:false}));return;
       }
       if(!parsed.length)throw new Error("no rows found");
-      const t=parsed.map((r,i)=>({id:i,sp:r.sp,size:r.size,boxes:r.boxes,wt:r.wt,avgBox:r.boxes?+(r.wt/r.boxes).toFixed(1):0}));
+      const t=parsed.map((r,i)=>({id:i,sp:canonSp(r.sp),size:r.size,boxes:r.boxes,wt:r.wt,avgBox:r.boxes?+(r.wt/r.boxes).toFixed(1):0}));
       setTally(t);setMap(buildMapping(t));
       setMsg((m)=>({...m,boat:`Loaded ${t.length} size lines across ${new Set(t.map((x)=>x.sp)).size} species${usedAI?" (read by AI — check step 4 carefully)":""}. Mapping auto-built — check step 4.`}));
     }catch(e){setMsg((m)=>({...m,boat:`Couldn't read boat file (${e.message}). Sample tally still loaded.`}));}
