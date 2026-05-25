@@ -23,7 +23,7 @@ const C = {
    Direction confirmed: 1 = smallest; names are authoritative.
    PD A1(big)..A5(small)/U9 ; DK sort 1(big), higher=smaller, 0=above 1. */
 const GRADE_DICT = {
-  CAT:{ SMALL:{pd:"U9",dk:"2",c:"med"}, MEDIUM:{pd:"U9",dk:"1",c:"med"}, LARGE:{pd:"U9",dk:"1",c:"med"} },
+  CAT:{ SMALL:{pd:"U9 (low)",dk:"2",c:"med"}, MEDIUM:{pd:"U9",dk:"1",c:"med"}, LARGE:{pd:"U9 (high)",dk:"1",c:"med"} },
   COD:{ ROBBIE:{pd:"A5",dk:"5",c:"high"}, BABY:{pd:"A5",dk:"5",c:"high"}, "BIG BABY":{pd:"A4",dk:"4",c:"high"},
         MEDIUM:{pd:"A3",dk:"3",c:"high"}, SPRAG:{pd:"A2",dk:"2",c:"high"}, COD:{pd:"A1",dk:"1",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"0",c:"med"}, "X LARGE":{pd:"A1",dk:"0",c:"med"} },
   HADDOCK:{ "MINI METRO":{pd:"A4",dk:"3",c:"high"}, METRO:{pd:"A4",dk:"3",c:"med"}, CHIPPER:{pd:"A4",dk:"2",c:"med"},
@@ -34,16 +34,16 @@ const GRADE_DICT = {
   "LEMON SOLE":{ SMALL:{pd:"A3",dk:"3",c:"low"}, MEDIUM:{pd:"A2",dk:"2",c:"low"}, LARGE:{pd:"A1",dk:"2",c:"low"} },
   LING:{ SMALL:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"} },
   LYTHE:{ SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"}, SELECTED:{pd:"A3",dk:"3",c:"high"},
-        MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A2",dk:"1",c:"med"} },
+        MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"2",c:"med"} },
   MEGRIM:{ "X SMALL":{pd:"A3",dk:"3",c:"med"}, SMALL:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"med"}, LARGE:{pd:"A2",dk:"1",c:"med"} },
   MONKFISH:{ FROGS:{pd:"A5",dk:"5",c:"high"}, SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"},
         SELECTED:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"}, XL:{pd:"A1",dk:"1",c:"med"} },
   SAITHE:{ "X SMALL":{pd:"A4",dk:"4",c:"high"}, SMALL:{pd:"A4",dk:"4",c:"high"}, SEL:{pd:"A3",dk:"3",c:"high"},
         SELECTED:{pd:"A3",dk:"3",c:"high"}, MEDIUM:{pd:"A2",dk:"2",c:"high"}, LARGE:{pd:"A1",dk:"1",c:"high"} },
-  SQUID:{ SEL:{pd:"ANY",dk:"2",c:"low"}, SELECTED:{pd:"ANY",dk:"2",c:"low"}, MEDIUM:{pd:"ANY",dk:"2",c:"low"}, SMALL:{pd:"ANY",dk:"2",c:"low"} },
-  TURBOT:{ "SIZE 1":{pd:"U9",dk:"—",c:"low"}, LARGE:{pd:"U9",dk:"—",c:"low"} },
+  SQUID:{ SEL:{pd:"U9",dk:"2",c:"low"}, SELECTED:{pd:"U9",dk:"2",c:"low"}, MEDIUM:{pd:"U9",dk:"2",c:"low"}, SMALL:{pd:"U9 (low)",dk:"2",c:"low"} },
+  TURBOT:{ "SIZE 1":{pd:"U9 (low)",dk:"3",c:"low"}, SMALL:{pd:"U9 (low)",dk:"3",c:"low"}, LARGE:{pd:"U9 (high)",dk:"1",c:"low"} },
   TUSK:{ "SIZE 1":{pd:"U9",dk:"1",c:"low"}, MIX:{pd:"U9",dk:"1",c:"med"} },
-  WHITING:{ "SMALL ROUND":{pd:"A4r",dk:"2",c:"med"}, ROUND:{pd:"A4r",dk:"2",c:"med"}, SMALL:{pd:"A2",dk:"1",c:"med"}, MEDIUM:{pd:"A2",dk:"1",c:"high"} },
+  WHITING:{ "SMALL ROUND":{pd:"A4r (low)",dk:"2",c:"med"}, ROUND:{pd:"A4r",dk:"2",c:"med"}, SMALL:{pd:"A2",dk:"1",c:"med"}, MEDIUM:{pd:"A2",dk:"1",c:"high"} },
   WITCH:{ "SIZE 3":{pd:"U9",dk:"3",c:"low"}, ROUND:{pd:"U9",dk:"2",c:"low"} },
 };
 
@@ -52,7 +52,7 @@ const SP_TO_PD = { CAT:"Catfish", COD:"Cod", HADDOCK:"Haddock", HAKE:"Hake", HAL
   SAITHE:"Coley", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch" };
 const SP_TO_DK = { CAT:"Catfishes", COD:"Atlantic Cod", HADDOCK:"Haddock", HAKE:"European Hake",
   HALIBUT:"Atlantic Halibut", "LEMON SOLE":"Lemon Sole", LING:"Ling", LYTHE:"Pollack", MEGRIM:"Megrim",
-  MONKFISH:"Monkfish", SAITHE:"Saithe", SQUID:"Squid", TURBOT:"—", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch Flounder" };
+  MONKFISH:"Monkfish", SAITHE:"Saithe", SQUID:"Squid", TURBOT:"Turbot", TUSK:"Tusk", WHITING:"Whiting", WITCH:"Witch Flounder" };
 
 const DEFAULT_PD = {
   Cod:{A1:7.08,A2:7.26,A3:7.41}, Haddock:{A1:6.75,A2:6.98,A3:4.77,A4:2.42,A4c:2.50,A4m:2.50,A4ma:2.20},
@@ -202,7 +202,7 @@ export default function App(){
     try{
       const b64=await fileToB64(file);const mt=file.type||"image/png";
       const prompt=which==="pd"
-        ?`Peterhead fish market sheet with LOW, HIGH, AVE columns. Extract species + grade (A1..A5,U9) and the AVE price (GBP). Respond with ONLY a JSON object and nothing else — no explanation, no markdown. Shape: {"Species":{"A1":7.02}}. Use AVE column, skip blank cells. SPECIAL CASE Haddock A4 (rows Chipper, Metro, Round): keys "A4c"=Chipper AVE, "A4m"=Metro HIGH column, "A4ma"=Metro AVE, "A4"=Chipper AVE. Example {"Haddock":{"A1":6.75,"A4c":2.50,"A4m":2.50,"A4ma":2.20,"A4":2.50}}.`
+        ?`Peterhead fish market sheet with three price columns LOW, HIGH, AVE (GBP). For EVERY priced row, extract the species, the grade (A1..A5 or U9), and ALL THREE prices. Respond with ONLY a JSON object, no explanation, no markdown. For each grade output the AVE under the grade key, plus two extra keys "<grade> (low)" = LOW and "<grade> (high)" = HIGH. Example {"Cod":{"A1":6.85,"A1 (low)":6.05,"A1 (high)":8.48}}. Skip rows where all three cells are blank. NAMING RULES (use these exact species names): the row "Lythe/Pollack" -> "Lythe"; the row "Megrims" -> "Megrim"; the row "Round Whiting" -> add to "Whiting" as keys "A4r"=AVE, "A4r (low)"=LOW, "A4r (high)"=HIGH; for squid use ONLY the "Squid Trawl" row, name it "Squid" and put its prices under grade "U9" (ignore Fresh/Rockall squid rows). SPECIAL CASE Haddock A4 has three rows Chipper/Metro/Round: also output keys "A4c"=Chipper AVE, "A4m"=Metro HIGH, "A4ma"=Metro AVE, "A4"=Chipper AVE (keep the (low)/(high) keys for A1..A3 etc as normal).`
         :`Hanstholm Danish auction sheet. Extract species + sort number (0,1,2,3,4,5,9) and the Avg. price (the second price on each row; the first is Max). Respond with ONLY a JSON object, no explanation, no markdown. Shape: {"Species":{"1":5.17}}. Sorts are strings. Keep names like "Atlantic Cod","European Hake".`;
       const resp=await fetch("/.netlify/functions/parse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({media:b64,mediaType:mt,prompt})});
       const data=await resp.json();
