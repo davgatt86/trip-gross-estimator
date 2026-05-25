@@ -20,15 +20,23 @@ export const handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: "Bad JSON body" }) };
   }
 
-  const { media, mediaType, prompt } = payload;
-  if (!media || !prompt) {
-    return { statusCode: 400, body: JSON.stringify({ error: "Missing media or prompt" }) };
+  const { media, mediaType, prompt, text } = payload;
+  if (!prompt || (!media && !text)) {
+    return { statusCode: 400, body: JSON.stringify({ error: "Missing prompt, and one of media or text" }) };
   }
 
-  const isPdf = (mediaType || "").includes("pdf");
-  const doc = isPdf
-    ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: media } }
-    : { type: "image", source: { type: "base64", media_type: mediaType || "image/png", data: media } };
+  // Build the message content. Media (PDF/image) when provided; otherwise a
+  // plain-text block (used for spreadsheet rows that the browser already read).
+  let content;
+  if (media) {
+    const isPdf = (mediaType || "").includes("pdf");
+    const doc = isPdf
+      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: media } }
+      : { type: "image", source: { type: "base64", media_type: mediaType || "image/png", data: media } };
+    content = [doc, { type: "text", text: prompt }];
+  } else {
+    content = [{ type: "text", text: prompt + "\n\n----- DATA -----\n" + text }];
+  }
 
   try {
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -41,7 +49,7 @@ export const handler = async (event) => {
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 4000,
-        messages: [{ role: "user", content: [doc, { type: "text", text: prompt }] }],
+        messages: [{ role: "user", content }],
       }),
     });
 
